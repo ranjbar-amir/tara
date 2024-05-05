@@ -16,12 +16,12 @@ exports.add = async (_req, _res) => {
             if (user.length > 0) {
                 return _res.status(400).send({ message: resMessage.BAD_REQUEST_400.duplicate_record })
             }
-            await User.create({ ..._req.body, isActive: "initial" })
+            await User.create({ ..._req.body, isActive: "initial", isAdmin: 0 })
             _res.send({ message: resMessage.OK_200.success })
 
         } catch (error) {
-        
-            _res.status(500).send({ message: resMessage.INTERNAL_SERVER_500.server_error,error})
+
+            _res.status(500).send({ message: resMessage.INTERNAL_SERVER_500.server_error, error })
         }
     }
     else {
