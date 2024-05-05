@@ -9,6 +9,12 @@ module.exports = (connection, Sequelize) => {
         name: {
             type: Sequelize.STRING,
             allowNull: false,
+            validate: {
+                len: [4, 15],
+                notNull: {
+                    msg: 'Please enter your name',
+                },
+            }
         },
 
    

@@ -12,19 +12,20 @@ const verifyToken = (_req, _res, _next) => {
 		const bearerToken = bearer[1]
 		_req.token = bearerToken
 	}
+	
 	token = _req.token
 	if (!token) {
 
-		if (_req.route.path == '/qa/listbyviewCount') {
-			_req.isListByViewCount = true
-			return _next()
+		// if (_req.route.path == '/qa/listbyviewCount') {
+		// 	_req.isListByViewCount = true
+		// 	return _next()
 
-		} else {
+		// } else {
 
 			return _res.status(401).send({
 				message: 'توکن وجود ندارد'
 			})
-		}
+		//}
 
 	}
 	jwt.verify(token, config.secret, async (err, decoded) => {

@@ -9,8 +9,14 @@ module.exports = (connection, Sequelize) => {
         draft: {
             type: Sequelize.TEXT,
             allowNull: false,
+            validate: {
+                len: [4, 500],
+                notNull: {
+                    msg: 'Please enter your draft',
+                },
+            }
         },
-        status: {//public|| private
+        status: {
             type: Sequelize.BOOLEAN,
             allowNull: false,
         }

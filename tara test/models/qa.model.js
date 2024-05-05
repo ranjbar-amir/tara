@@ -8,11 +8,17 @@ module.exports = (connection, Sequelize) => {
         },
         refId: {
             type: Sequelize.UUID,
-        
+
         },
         draft: {
             type: Sequelize.TEXT,
             allowNull: false,
+            validate: {
+                len: [4, 500],
+                notNull: {
+                    msg: 'Please enter your draft',
+                },
+            }
         },
         status: {
             type: Sequelize.BOOLEAN,

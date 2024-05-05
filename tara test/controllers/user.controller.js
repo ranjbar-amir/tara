@@ -16,11 +16,12 @@ exports.add = async (_req, _res) => {
             if (user.length > 0) {
                 return _res.status(400).send({ message: resMessage.BAD_REQUEST_400.duplicate_record })
             }
-            await User.create(_req.body)
+            await User.create({ ..._req.body, isActive: "initial" })
             _res.send({ message: resMessage.OK_200.success })
 
         } catch (error) {
-            _res.status(500).send({ message: resMessage.INTERNAL_SERVER_500.server_error })
+        
+            _res.status(500).send({ message: resMessage.INTERNAL_SERVER_500.server_error,error})
         }
     }
     else {
@@ -31,13 +32,13 @@ exports.add = async (_req, _res) => {
 // method patch
 exports.activeUser = async (_req, _res) => {
 
-    if (_req.body.email) {
+    if (_req.body.email && _req.body.isActive) {
         try {
             const user = await User.findAll({ where: { email: _req.body.email } })
             if (user.length == 0) {
                 return _res.status(404).send({ message: resMessage.NOT_FOUND_404.not_found })
             }
-            await User.update({ isActive: true }, {
+            await User.update({ isActive: _req.body.isActive }, {
                 where: {
                     email: _req.body.email
                 }
@@ -85,7 +86,7 @@ exports.login = async (_req, _res) => {
             where: {
                 [Op.or]: [{ email: _req.body.email, password: _req.body.password }]
             }
-            
+
         }).then(async (_result) => {
 
 

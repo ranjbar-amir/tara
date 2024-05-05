@@ -3,12 +3,14 @@ const QA = require('../models').qa;
 const resMessage = require('../config/responseMessage.config');
 const db = require('../models')
 const Connection = db.connection
-
+const jwt = require('jsonwebtoken')
+const config = require('../config/auth.config.js')
+const User = db.user
 // localhost:8888/qa/add
 // method post
 exports.add = async (_req, _res) => {
 
-    if (_req.body.draft ) {
+    if (_req.body.draft) {
         try {
 
             const qa = await QA.create(_req.body)
@@ -55,7 +57,7 @@ exports.list = async (_req, _res) => {
     _req.query.order == 1 ? where = "order by t_id ASC" : where = "order by t_id DESC"
 
     await Connection.query(`SELECT qa.* FROM qa left join topicqa on qa.qa_id=topicqa.qa_id  ${where}`,
-    {type:db.Sequelize.QueryTypes.SELECT})
+        { type: db.Sequelize.QueryTypes.SELECT })
         .then(_result => {
 
             if (_result.length > 0)
@@ -146,7 +148,7 @@ exports.search = async (_req, _res) => {
 
             const result = await Connection.query(`
             select * from qa where draft like '%${_req.query.search}%' and status=true`)
-            
+
             return _res.send({ message: resMessage.OK_200.success, result })
         }
         else {
@@ -163,28 +165,88 @@ exports.search = async (_req, _res) => {
 // method get
 exports.listByViewCount = async (_req, _res) => {
 
-    await Connection.query(`select qa.*,section.s_id,section.status,
-    ifnull(viewCount,0) as viewCount ,
-    ifnull(likeCount,0) as likeCount,
-    ifnull(disLikeCount,0) as disLikeCount from qa 
-    left join topicqa on qa.qa_id = topicqa.qa_id
-     inner join sectiontopic st on st.t_id= topicqa.t_id
-     inner join section on section.s_id=st.s_id
-	 left outer join ( select count(*) as viewCount,qa_id from userqa group by qa_id) as v on  v.qa_id=qa.qa_id
-	 left outer join ( select count(*) as likeCount,qa_id  from userqa where isLiked = true group by qa_id) as l on l.qa_id=qa.qa_id
-	 left outer join ( select count(*) as disLikeCount,qa_id from userqa where isLiked <> true group by qa_id) as d on d.qa_id=qa.qa_id 
-   ${_req.isListByViewCount ?" where section.status=true" :""} 
-     order by viewCount desc`,
-     {type:db.Sequelize.QueryTypes.SELECT})
-        .then(_result => {
+    let query = `select qa.*,section.s_id,section.status,
+ifnull(viewCount,0) as viewCount ,
+ifnull(likeCount,0) as likeCount,
+ifnull(disLikeCount,0) as disLikeCount from qa 
+left join topicqa on qa.qa_id = topicqa.qa_id
+ inner join sectiontopic st on st.t_id= topicqa.t_id
+ inner join section on section.s_id=st.s_id
+ left outer join ( select count(*) as viewCount,qa_id from userqa group by qa_id) as v on  v.qa_id=qa.qa_id
+ left outer join ( select count(*) as likeCount,qa_id  from userqa where isLiked = true group by qa_id) as l on l.qa_id=qa.qa_id
+ left outer join ( select count(*) as disLikeCount,qa_id from userqa where isLiked <> true group by qa_id) as d on d.qa_id=qa.qa_id `
 
-            if (_result.length > 0)
-                _res.status(200).send(_result)
 
-            else
-                _res.status(200).send([])
+    const authHeader = _req.headers['authorization']
+    if (authHeader && authHeader.toLowerCase().includes('bearer')) {
+        const bearer = authHeader.split(' ')
+        const bearerToken = bearer[1]
+        _req.token = bearerToken
+    }
+
+    let token = _req.token
+
+    if (!token) {
+        await Connection.query(`${query} where section.status=true order by viewCount desc`,
+
+            { type: db.Sequelize.QueryTypes.SELECT })
+            .then(_result => {
+
+                if (_result.length > 0)
+                    _res.status(200).send(_result)
+
+                else
+                    _res.status(200).send([])
+            })
+            .catch((error) => {
+                _res.status(500).send({ message: resMessage.INTERNAL_SERVER_500.server_error, error })
+            })
+    }
+    else {
+
+        jwt.verify(token, config.secret, async (err, decoded) => {
+            if (err) {
+                return _res.status(402).send({ message: 'دسترسی لازم وجود ندارد' })
+            }
+
+            await User.findOne({
+                where: {
+                    email: decoded.name.trim(),
+                }
+            })
+                .then(async _result => {
+
+                    if (_result) {
+
+
+                        await Connection.query(query,
+                            { type: db.Sequelize.QueryTypes.SELECT })
+                            .then(_result => {
+
+                                if (_result.length > 0)
+                                    _res.status(200).send(_result)
+
+                                else
+                                    _res.status(200).send([])
+                            })
+                            .catch((error) => {
+                                _res.status(500).send({ message: resMessage.INTERNAL_SERVER_500.server_error, error })
+                            })
+                    }
+                    else {
+                        return _res.status(401).send({ message: 'دسترسی لازم وجود ندارد' })
+                    }
+
+                }).catch(error => {
+                    return _res.status(401).send({ message: resMessage.INTERNAL_SERVER_500.server_error })
+                })
         })
-        .catch((error) => {
-            _res.status(500).send({ message: resMessage.INTERNAL_SERVER_500.server_error, error })
-        })
+
+
+
+
+
+    }
+
+
 }

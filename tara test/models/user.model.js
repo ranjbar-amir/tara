@@ -8,25 +8,47 @@ module.exports = (connection, Sequelize) => {
         },
         name: {
             type: Sequelize.STRING,
-
+            allowNull: false,
+            validate: {
+                len: [4, 15],
+                notNull: {
+                    msg: 'Please enter your name',
+                },
+            }
         },
         password: {
             type: Sequelize.STRING,
             allowNull: false,
+            validate: {
+                len: [4, 15],
+                notNull: {
+                    msg: 'Please enter your password',
+                },
+            }
         },
         email: {
             type: Sequelize.STRING,
             allowNull: false,
+            validate: {
+                isEmail: true
+            },
+            notNull: {
+                msg: 'Please enter your email',
+            },
         },
         isAdmin: {
             type: Sequelize.BOOLEAN,
 
-        }, 
-        isActive: {
-            type: Sequelize.BOOLEAN,
-
         },
-
+        isActive: {
+            type: Sequelize.ENUM({
+                values: ['initial', 'active', 'notactive']
+            },
+            ),
+            validate: {
+                isIn: [['initial', 'active', 'notactive']]
+            }
+        },
 
     }, {
         indexes: [

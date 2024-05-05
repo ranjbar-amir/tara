@@ -10,7 +10,7 @@ module.exports = function (app) {
 			'Origin, Content-Type, Accept'
 		)
 		req.ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress
-		// req.existToken=!! req.token
+
 		next()
 	})
 
@@ -21,6 +21,6 @@ module.exports = function (app) {
 	app.get('/qa/list', [auth.verifyToken], controller.list)
 	app.put('/qa/like/:qa_id/:like', [auth.verifyToken], controller.like)
 	app.get('/qa/search', [auth.verifyToken], controller.search)//have query param
-	app.get('/qa/listbyviewCount', [auth.verifyToken], controller.listByViewCount)//return list order by view count
-	app.get('/qa/listbyviewCount', [ auth.verifyToken], controller.listByViewCount)//return list order by view count
+	app.get('/qa/listbyviewCount', controller.listByViewCount)//return list order by view count
+
 }
