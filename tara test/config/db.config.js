@@ -1,10 +1,10 @@
 module.exports = {
 
   mySql: {
-    HOST: "127.1.1.1",
+    HOST: "localhost",
     PORT: "3306",
-    USER: "root",
-    PASSWORD: "root",
+    USER: "sepideh",
+    PASSWORD: 'sepideh',
     DB: "taraDB",
     dialect: "mysql",
     pool: {
@@ -19,7 +19,7 @@ module.exports = {
 
   },
   anotherDB: {
-    HOST: "192.168.1.139",
+    HOST: "127.1.1.1",
     PORT: "1433",
     USER: "sa",
     PASSWORD: "123",

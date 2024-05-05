@@ -15,9 +15,17 @@ const verifyToken = (_req, _res, _next) => {
 	token = _req.token
 	if (!token) {
 
-		return _res.status(401).send({
-			message: 'توکن وجود ندارد'
-		})
+		if (_req.route.path == '/qa/listbyviewCount') {
+			_req.isListByViewCount = true
+			return _next()
+
+		} else {
+
+			return _res.status(401).send({
+				message: 'توکن وجود ندارد'
+			})
+		}
+
 	}
 	jwt.verify(token, config.secret, async (err, decoded) => {
 		if (err) {
@@ -26,7 +34,7 @@ const verifyToken = (_req, _res, _next) => {
 
 		await User.findOne({
 			where: {
-				name: decoded.name.trim(),
+				email: decoded.name.trim(),
 			}
 		})
 			.then(_result => {

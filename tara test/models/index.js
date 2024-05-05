@@ -34,14 +34,14 @@ db.topic.belongsToMany(db.section, {
 db.qa.belongsToMany(db.topic, {
   foreignKey: 'qa_id',
   through: 'topicQa',
-  onDelete: 'CASCADE'
+ // onDelete: 'CASCADE'
 
 })
 
 db.topic.belongsToMany(db.qa, {
   foreignKey: 't_id',
   through: 'topicQa',
-  onDelete: 'CASCADE'
+ // onDelete: 'CASCADE'
 
 })
 

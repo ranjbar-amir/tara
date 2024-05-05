@@ -10,7 +10,7 @@ module.exports = (connection, Sequelize) => {
             type: Sequelize.TEXT,
             allowNull: false,
         },
-        status: {
+        status: {//public|| private
             type: Sequelize.BOOLEAN,
             allowNull: false,
         }

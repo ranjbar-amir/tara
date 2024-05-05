@@ -21,13 +21,15 @@ const isAdmin = (_req, _res, _next) => {
 	}
 
 	jwt.verify(token, config.secret, async (err, decoded) => {
+
+		//console.log(decoded);
 		if (err) {
 			return _res.status(402).send({ message: 'دسترسی لازم وجود ندارد' })
 		}
 
 		await User.findOne({
 			where: {
-				name: decoded.name.trim(),
+				email: decoded.name.trim(),
 				isAdmin: true
 
 			}

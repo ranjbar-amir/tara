@@ -10,13 +10,12 @@ exports.add = async (_req, _res) => {
 
     if (_req.body.t_id && _req.body.qa_id) {
         try {
-
             await Connection.query(`INSERT INTO topicQa (t_id, qa_id,createdAt,updatedAt)
             VALUES ('${_req.body.t_id}', '${_req.body.qa_id}',CURDATE(),CURDATE())`)
 
             _res.send({ message: resMessage.OK_200.success })
         } catch (error) {
-
+           
             _res.status(500).send({ message: resMessage.INTERNAL_SERVER_500.server_error })
         }
     }
