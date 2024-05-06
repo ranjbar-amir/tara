@@ -1,4 +1,6 @@
 
+const bcrypt = require('bcryptjs')
+
 module.exports = (connection, Sequelize) => {
     const User = connection.define('user', {
         u_id: {
@@ -6,19 +8,32 @@ module.exports = (connection, Sequelize) => {
             defaultValue: Sequelize.UUIDV4,
             primaryKey: true,
         },
-        name: {
+        firstName: {
             type: Sequelize.STRING,
             allowNull: false,
             validate: {
                 len: [4, 15],
                 notNull: {
-                    msg: 'Please enter your name',
+                    msg: 'Please enter your firstName',
+                },
+            }
+        },
+        lastName: {
+            type: Sequelize.STRING,
+            allowNull: false,
+            validate: {
+                len: [4, 15],
+                notNull: {
+                    msg: 'Please enter your lastName',
                 },
             }
         },
         password: {
             type: Sequelize.STRING,
             allowNull: false,
+            set(value) {
+                this.setDataValue('password', bcrypt.hashSync(value))
+            },
             validate: {
                 len: [4, 15],
                 notNull: {
@@ -49,7 +64,43 @@ module.exports = (connection, Sequelize) => {
                 isIn: [['initial', 'active', 'notactive']]
             }
         },
-
+        identityId: {//شناسنامه
+            type: Sequelize.INTEGER,
+            allowNull: false,
+            validate: {
+                len: [10, 10],
+                notNull: {
+                    msg: 'Please enter your identityId',
+                },
+            }
+        },
+        nationalCard: {// شماره ملی
+            type: Sequelize.INTEGER,
+            allowNull: false,
+            validate: {
+                len: [4, 10],
+                notNull: {
+                    msg: 'Please enter your nationalCard',
+                },
+            }
+        },
+        job: {
+            type: Sequelize.STRING,
+        },
+        phone: {
+            type: Sequelize.STRING,
+            allowNull: false,
+            validate: {
+                is: /(\+98|0)9\d{9}$/i
+            },
+            unique: {
+                args: true,
+                msg: "mobileValidate"
+            }
+        },
+        address: {
+            type: Sequelize.STRING,
+        },
     }, {
         indexes: [
             {
